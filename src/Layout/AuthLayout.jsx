@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
-import { HiOutlineSparkles } from "react-icons/hi";
+import Aura from '../../public/images/Screenshot 2026-02-17 at 2.45.18 PM.png'
 
 const fadeSide = {
   hidden: { opacity: 0, x: -40 },
@@ -14,28 +14,21 @@ const fadeSide = {
 function AuthLayout() {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-3">
-      <Motion.div
-        className="hidden lg:flex lg:col-span-1 relative items-center justify-center
-        bg-linear-to-br from-emerald-700 via-emerald-800 to-slate-900 text-white overflow-hidden"
-        variants={fadeSide}
-        initial="hidden"
-        animate="visible"
-      >
-        <div className="relative z-10 p-10 max-w-sm space-y-6">
-          <div className="flex items-center gap-2 text-xl font-semibold">
-            <HiOutlineSparkles className="text-emerald-300 text-2xl animate-pulse" />
-            <span>Aura</span>
-          </div>
+      
+      {/* الصورة تغطي نفس مساحة الجزء الأخضر */}
+  <Motion.div
+  className="hidden lg:flex lg:col-span-1 relative overflow-hidden h-screen"
+  variants={fadeSide}
+  initial="hidden"
+  animate="visible"
+>
+  <img
+    src={Aura}
+    alt="Aura panel"
+    className="w-full h-full object-cover"
+  />
+</Motion.div>
 
-          <h1 className="text-4xl font-bold">
-            Welcome to <span className="text-emerald-300">Aura</span>
-          </h1>
-
-          <p className="text-sm text-emerald-100">
-            A calm space for meaningful conversations.
-          </p>
-        </div>
-      </Motion.div>
 
       <div className="lg:col-span-2 bg-slate-50 flex flex-col justify-between">
         <Outlet />

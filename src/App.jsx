@@ -8,17 +8,19 @@ import NotFound from './Pages/NotFound/NotFound'
 import AuthLayout from './Layout/AuthLayout'
 import Login from './Pages/Auth/Login/Login'
 import Register from './Pages/Auth/Register/Register'
+import AppProtected from './components/ProtectedRoutes/AppProtected'
+import AuthProtected from './components/ProtectedRoutes/AuthProtected'
 
 
 const router = createBrowserRouter([
-  { path: '', element:<MainLayout/> , children:[
+  { path: '', element:<AppProtected><MainLayout/></AppProtected> , children:[
 
     {index:true , element:<Navigate to = {"home"}/>},
     {path:'/home' , element:<NewsFeed/>},
     {path:'/profile' , element:<UserProfile/>},
-    {path:'*' , element:<NotFound/>}
+   
   ]},
-  {path:'',element:<AuthLayout/>, children:[
+  {path:'',element:<AuthProtected><AuthLayout/></AuthProtected>, children:[
 
 {path:'/login' , element:<Login/>},
 {path:'/register' , element:<Register/>},
@@ -26,7 +28,9 @@ const router = createBrowserRouter([
 
 
 
-  ]}
+  ]},{
+    path:'*' , element:<NotFound/>
+  }
 ])
 
 

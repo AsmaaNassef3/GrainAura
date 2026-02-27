@@ -16,5 +16,13 @@ export default defineConfig({
   },
   server: {
     open: true,
+    proxy: {
+      "/api": {
+        target: "https://linked-posts.routemisr.com",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
 });
