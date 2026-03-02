@@ -5,15 +5,17 @@ import {
   ModalBody,
   Avatar,
 } from "@heroui/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { FaThumbsUp, FaComment, FaShare, FaPaperPlane } from "react-icons/fa";
-import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
+import { FiMoreHorizontal, FiEdit3, FiTrash2 } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion"; // eslint-disable-line no-unused-vars
 import {
   getSinglePost,
   getPostComments,
   addComment,
 } from "../../services/PostsServices";
 import PostCardSkeleton from "../Skeleton/Skeleton";
+import { UserContext } from "../../context/UserDataContext";
 
 const DEFAULT_AVATAR = "https://i.pravatar.cc/100?img=";
 
@@ -24,7 +26,7 @@ export default function PostModal({ isOpen, onClose, postId }) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [sending, setSending] = useState(false);
-
+  const { userData } = useContext(UserContext);
   useEffect(() => {
     if (isOpen && postId) {
       async function fetchPostData() {
@@ -47,29 +49,24 @@ export default function PostModal({ isOpen, onClose, postId }) {
     }
   }, [isOpen, postId]);
 
-  async function handleSendComment() {
+  function handleSendComment() {
     if (!commentText.trim() || sending) return;
-
     setSending(true);
-    try {
-      const res = await addComment(postId, {
-        body: commentText,
-        userId: 1, // Default user ID
-      });
-
-      // Create new comment object from response
-      const newComment = res.data;
-
-      // Prepend new comment to the top of the list
-      setComments([newComment, ...comments]);
-
-      // Clear input field
-      setCommentText("");
-    } catch (err) {
-      console.error("Error sending comment:", err);
-    } finally {
-      setSending(false);
-    }
+    // Create a new comment object using logged-in user data
+    const newComment = {
+      id: Date.now(), // Unique ID for frontend
+      body: commentText,
+      user: {
+        id: userData?.id,
+        username: userData?.username,
+        avatar: userData?.avatar || `${DEFAULT_AVATAR}${userData?.id || 1}`,
+      },
+    };
+    // Prepend new comment to the top of the list
+    setComments([newComment, ...comments]);
+    // Clear input field
+    setCommentText("");
+    setSending(false);
   }
 
   return (
@@ -100,8 +97,11 @@ export default function PostModal({ isOpen, onClose, postId }) {
               ) : (
                 <div className="flex items-center gap-3">
                   <Avatar
-                    src={`https://picsum.photos/seed/${post?.userId}/100`}
-                    name={`User ${post?.userId}`}
+                    src={
+                      userData?.avatar ||
+                      `https://picsum.photos/seed/${post?.userId}/100`
+                    }
+                    name={userData?.username || `User ${post?.userId}`}
                     size="lg"
                     classNames={{
                       base: "ring-2 ring-emerald-500/20",
@@ -109,9 +109,14 @@ export default function PostModal({ isOpen, onClose, postId }) {
                   />
                   <div className="flex flex-col">
                     <h3 className="text-lg font-semibold text-gray-900">
-                      User {post?.userId || "Unknown"}
+                      {userData?.username ||
+                        `User ${post?.userId}` ||
+                        "Unknown"}
                     </h3>
-                    <p className="text-sm text-gray-500">@user{post?.userId}</p>
+                    <p className="text-sm text-gray-500">
+                      @
+                      {userData?.username || `user${post?.userId}` || "unknown"}
+                    </p>
                   </div>
                 </div>
               )}
@@ -215,33 +220,13 @@ export default function PostModal({ isOpen, onClose, postId }) {
                       <h4 className="font-semibold text-gray-900">
                         Comments ({comments.length})
                       </h4>
-                      <div className="space-y-4 max-h-96 overflow-y-auto">
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
                         {comments.map((comment) => (
-                          <div
+                          <ModalCommentItem
                             key={comment.id}
-                            className="flex gap-3 p-3 rounded-lg bg-gray-50/50 hover:bg-gray-100/50 transition-colors"
-                          >
-                            <Avatar
-                              src={`https://i.pravatar.cc/100?img=${
-                                comment.user?.id || 1
-                              }`}
-                              name={comment.user?.username}
-                              size="sm"
-                              classNames={{
-                                base: "ring-2 ring-emerald-500/10",
-                              }}
-                            />
-                            <div className="flex-1 space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-sm text-gray-900">
-                                  {comment.user?.username || "Anonymous"}
-                                </span>
-                              </div>
-                              <p className="text-sm text-gray-700">
-                                {comment.body}
-                              </p>
-                            </div>
-                          </div>
+                            comment={comment}
+                            loggedUserId={userData?.id}
+                          />
                         ))}
                       </div>
                     </div>
@@ -253,5 +238,78 @@ export default function PostModal({ isOpen, onClose, postId }) {
         )}
       </ModalContent>
     </Modal>
+  );
+}
+
+function ModalCommentItem({ comment, loggedUserId }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const isOwner =
+    loggedUserId && String(loggedUserId) === String(comment.user?.id);
+
+  useEffect(() => {
+    function handleOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
+  return (
+    <div className="flex gap-3 p-3 rounded-xl bg-gray-50/50 hover:bg-gray-100/50 transition-colors">
+      <Avatar
+        src={`https://i.pravatar.cc/100?img=${comment.user?.id || 1}`}
+        name={comment.user?.username}
+        size="sm"
+        classNames={{ base: "ring-2 ring-emerald-500/10 shrink-0" }}
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-semibold text-sm text-gray-900">
+            {comment.user?.username || "Anonymous"}
+          </span>
+          {isOwner && (
+            <div className="relative shrink-0" ref={ref}>
+              <motion.button
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setOpen((v) => !v)}
+                className="p-1 rounded-lg text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-150"
+              >
+                <FiMoreHorizontal size={15} />
+              </motion.button>
+              <AnimatePresence>
+                {open && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.92, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, y: -4 }}
+                    transition={{ duration: 0.13 }}
+                    className="absolute right-0 mt-1 w-40 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden"
+                  >
+                    <button
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-150"
+                    >
+                      <FiEdit3 size={13} className="text-emerald-600" />
+                      Edit Comment
+                    </button>
+                    <div className="mx-3 h-px bg-gray-100" />
+                    <button
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-medium text-red-500 hover:bg-red-50 transition-all duration-150"
+                    >
+                      <FiTrash2 size={13} />
+                      Delete Comment
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+        <p className="text-sm text-gray-700 mt-0.5">{comment.body}</p>
+      </div>
+    </div>
   );
 }

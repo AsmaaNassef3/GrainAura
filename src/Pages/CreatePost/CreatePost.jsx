@@ -1,12 +1,20 @@
 // CreatePost.jsx
-import { useState } from "react";
-import { Card, CardBody, Input, Button } from "@heroui/react";
+import { useContext, useState } from "react";
 import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import { FaImage, FaVideo, FaSmile } from "react-icons/fa";
 import CreatePostModal from "./CreatePostModal";
+import { UserContext } from "../../context/UserDataContext";
 
 export default function CreatePost({ onPostCreated }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { userData } = useContext(UserContext);
+
+  const userAvatar =
+    userData?.image ||
+    userData?.avatar ||
+    `https://i.pravatar.cc/150?img=${userData?.id || 1}`;
+  const userName =
+    userData?.name || userData?.firstName || userData?.username || "Nassef";
 
   return (
     <motion.div
@@ -14,70 +22,55 @@ export default function CreatePost({ onPostCreated }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <Card className="shadow-md rounded-2xl bg-white border border-gray-100 mb-6">
-        <CardBody className="p-4">
-          {/* Top Section - Avatar and Input */}
-          <div className="flex items-center gap-3 mb-4">
-            <img
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde"
-              alt="User Avatar"
-              className="w-12 h-12 rounded-full border border-gray-200"
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+        {/* Top Section - Avatar and Input */}
+        <div className="flex items-center gap-3 mb-3">
+          <img
+            src={userAvatar}
+            alt={userName}
+            className="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-100"
+          />
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex-1 text-left px-4 py-2.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-sm text-gray-500"
+          >
+            What&apos;s on your mind, {userName.split(" ")[0]}?
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-gray-100 mb-3" />
+
+        {/* Bottom Section - Buttons */}
+        <div className="flex items-center justify-around">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-xl transition-all duration-200 font-medium text-sm flex-1 justify-center group"
+          >
+            <FaImage
+              className="text-emerald-500 group-hover:scale-110 transition-transform duration-200"
+              size={18}
             />
-            <div
-              onClick={() => setIsModalOpen(true)}
-              className="flex-1 cursor-pointer"
-            >
-              <Input
-                placeholder="What's on your mind Asmaa?"
-                radius="full"
-                className="flex-1 pointer-events-none"
-                classNames={{
-                  inputWrapper:
-                    "bg-gray-100 border border-gray-200 hover:border-gray-300 transition-all",
-                  input: "text-gray-700 placeholder:text-gray-400 text-sm",
-                }}
-                readOnly
-              />
-            </div>
-          </div>
+            <span>Photo</span>
+          </button>
 
-          {/* Divider */}
-          <div className="h-px bg-gray-200 mb-4" />
+          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-xl transition-all duration-200 font-medium text-sm flex-1 justify-center group">
+            <FaVideo
+              className="text-red-400 group-hover:scale-110 transition-transform duration-200"
+              size={18}
+            />
+            <span>Video</span>
+          </button>
 
-          {/* Bottom Section - Buttons */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-300 font-medium text-sm"
-              >
-                <FaImage className="text-blue-500" size={18} />
-                <span className="hidden sm:inline">Photo</span>
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors duration-300 font-medium text-sm"
-              >
-                <FaVideo className="text-red-500" size={18} />
-                <span className="hidden sm:inline">Video</span>
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                className="flex items-center gap-2 text-gray-600 hover:text-yellow-500 transition-colors duration-300 font-medium text-sm"
-              >
-                <FaSmile className="text-yellow-500" size={18} />
-                <span className="hidden sm:inline">Activity</span>
-              </motion.button>
-            </div>
-
-            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 rounded-full transition-all duration-300 hover:scale-105">
-              Post
-            </Button>
-          </div>
-        </CardBody>
-      </Card>
+          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-xl transition-all duration-200 font-medium text-sm flex-1 justify-center group">
+            <FaSmile
+              className="text-yellow-400 group-hover:scale-110 transition-transform duration-200"
+              size={18}
+            />
+            <span>Feeling</span>
+          </button>
+        </div>
+      </div>
 
       {/* Modal */}
       <CreatePostModal

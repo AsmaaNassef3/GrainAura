@@ -12,6 +12,8 @@ import {
 } from "react-icons/fi";
 import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import { AuthContext } from "../../context/AuthContext";
+import { UserContext } from "../../context/UserDataContext";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const { setToken } = useContext(AuthContext);
@@ -19,6 +21,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const { userData } = useContext(UserContext);
 
   function logOut() {
     console.log("User logged out");
@@ -54,8 +57,14 @@ export default function Navbar() {
             whileHover={{ scale: 1.05 }}
             className="flex items-center gap-2 cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
-              <span className="text-lg font-bold text-white">✨</span>
+            <div
+              className="w-10 h-10 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #10b981, #0d9488)",
+              }}
+            >
+              <span className="text-lg font-bold text-white">A</span>
             </div>
             <div className="font-bold text-xl text-gray-900 hidden sm:block">
               Aura
@@ -79,13 +88,15 @@ export default function Navbar() {
           {/* Desktop Right Section */}
           <div className="hidden md:flex items-center gap-4" ref={menuRef}>
             {/* Home */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              className="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-all"
-              title="Home"
-            >
-              <FiHome size={20} />
-            </motion.button>
+            <Link to="/home">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                className="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-all"
+                title="Home"
+              >
+                <FiHome size={20} />
+              </motion.button>
+            </Link>
 
             {/* Messages */}
             <motion.button
@@ -117,7 +128,7 @@ export default function Navbar() {
                 className="p-1"
               >
                 <Avatar
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde"
+                  src={userData?.image || userData?.avatar}
                   className="ring-2 ring-gray-200 shadow-sm w-10 h-10"
                 />
               </motion.button>
@@ -131,7 +142,9 @@ export default function Navbar() {
                     transition={{ duration: 0.15 }}
                     className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-2xl shadow-lg p-2 backdrop-blur-sm"
                   >
-                    <DropdownItem icon="👤" label="My Profile" />
+                    <Link to="/my-profile" onClick={() => setOpen(false)}>
+                      <DropdownItem icon="👤" label="My Profile" />
+                    </Link>
                     <DropdownItem
                       icon={<FiSettings size={16} />}
                       label="Settings"
@@ -202,18 +215,26 @@ export default function Navbar() {
 
               {/* Mobile Menu Items */}
               <div className="space-y-2">
-                <motion.button
-                  whileHover={{ x: 4 }}
+                <Link
+                  to="/home"
+                  onClick={() => setMobileMenuOpen(false)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-all text-gray-700 font-medium"
                 >
                   <FiHome size={20} /> Home
-                </motion.button>
+                </Link>
                 <motion.button
                   whileHover={{ x: 4 }}
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-all text-gray-700 font-medium"
                 >
                   <FiMessageCircle size={20} /> Messages
                 </motion.button>
+                <Link
+                  to="/my-profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-all text-gray-700 font-medium"
+                >
+                  <span>👤</span> My Profile
+                </Link>
                 <motion.button
                   whileHover={{ x: 4 }}
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-all text-gray-700 font-medium"

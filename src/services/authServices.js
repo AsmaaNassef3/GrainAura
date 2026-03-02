@@ -31,3 +31,38 @@ export async function loginUser(formData) {
     }, 500);
   });
 }
+
+export async function changePassword(passwordData) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      // Simulate validation
+      if (passwordData.currentPassword !== "dummy123") {
+        reject({
+          response: {
+            data: {
+              message: "Current password is incorrect",
+            },
+          },
+        });
+        return;
+      }
+
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        reject({
+          response: {
+            data: {
+              message: "New passwords do not match",
+            },
+          },
+        });
+        return;
+      }
+
+      resolve({
+        data: {
+          message: "success",
+        },
+      });
+    }, 600);
+  });
+}
