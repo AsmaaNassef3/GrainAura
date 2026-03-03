@@ -1,16 +1,42 @@
+# 🌸 Grain Aura - Social Media App
 
-## 3️⃣ برومت جاهز للكوبايليوت / AI لتحسين README تلقائي
+[Live Demo](https://grain-aura-cao9.vercel.app/)
 
-```text
-You are an AI developer assistant. I have a React project called "Grain Aura", a social media app.  
-I already have a basic README with project description, features, and tech stack.  
+Grain Aura is a modern social media application built with **React**.  
+It allows users to create, edit, and delete posts and comments, manage their profiles, and interact with other users in a dynamic, responsive interface.
 
-I want you to:
+---
 
-1. Enhance the README with professional visual structure.
-2. Add placeholders for screenshots.
-3. Suggest sections for future improvements.
-4. Add graphical elements / icons or badges for React, Vite, Deployment, etc. using Markdown.
-5. Make it ready for GitHub, visually appealing, but do NOT mention dummy data.
+## ✨ Features
 
-Output a complete Markdown README.
+- **User Authentication & Profile Management**  
+  Sign up, log in, view, and edit your profile with ease.
+
+- **Posts Management**  
+  - Create new posts  
+  - Edit existing posts  
+  - Delete posts
+
+- **Comments Management**  
+  - Add comments to posts  
+  - Edit and delete your comments  
+
+- **Reactive User Data**  
+  The app dynamically updates the interface based on user actions.
+
+- **Responsive Design**  
+  Fully responsive layout that works on mobile, tablet, and desktop.
+
+- **Modern React Features**  
+  Built with **React Context** and **Hooks** for state management.
+
+---
+
+## 📸 Screenshots
+
+_Add your images here using Markdown syntax:_
+
+```markdown
+![Home Page](./images/homepage.png)
+![Profile Page](./images/profile.png)
+![Create Post](./images/create-post.png)
