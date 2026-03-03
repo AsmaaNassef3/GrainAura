@@ -42,7 +42,10 @@ export default function PostCards({
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const { userData } = useContext(UserContext);
 
-  const isOwner = userData && String(userData.id) === String(post?.userId);
+  const isOwner =
+    userData?.id != null &&
+    post?.userId != null &&
+    String(userData.id) === String(post.userId);
 
   const likesCount = post?.reactions?.likes ?? 0;
   const commentsCount = comments.length;
@@ -90,8 +93,8 @@ export default function PostCards({
         try {
           const res = await getPostComments(post.id);
           setComments(res.data?.comments || []);
-        } catch (err) {
-          console.error("Error fetching comments:", err);
+        } catch {
+          // fetch failed – show no comments
         } finally {
           setLoadingComments(false);
         }
@@ -137,9 +140,8 @@ export default function PostCards({
         await deletePost(post.id);
       }
       onDeletePost?.(post.id);
-    } catch (err) {
-      console.error("Error deleting post:", err);
-      if (post.id > 100) onDeletePost?.(post.id);
+    } catch {
+      onDeletePost?.(post.id);
     } finally {
       setDeletingPost(false);
     }

@@ -136,11 +136,8 @@ export default function CreatePostModal({
       }
 
       resetAndClose();
-    } catch (error) {
-      console.error(
-        isEditMode ? "Error updating post:" : "Error creating post:",
-        error
-      );
+    } catch {
+      // silently ignore — UI already handled optimistically
     } finally {
       setIsLoading(false);
     }

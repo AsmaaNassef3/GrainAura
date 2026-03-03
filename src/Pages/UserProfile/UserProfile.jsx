@@ -25,14 +25,16 @@ const staggerChildren = {
 };
 
 export default function UserProfile() {
-  const { userData, setUserData } = useContext(UserContext);
+  const { userData, setUserData, isLoading } = useContext(UserContext);
+
+  const resolvedName =
+    userData?.name ||
+    (userData?.firstName
+      ? `${userData.firstName || ""} ${userData.lastName || ""}`.trim()
+      : "");
 
   const [username, setUsername] = useState(userData?.username || "");
-  const [name, setName] = useState(
-    userData?.name || userData?.firstName
-      ? `${userData.firstName || ""} ${userData.lastName || ""}`.trim()
-      : ""
-  );
+  const [name, setName] = useState(resolvedName);
   const [email, setEmail] = useState(userData?.email || "");
   const [avatarPreview, setAvatarPreview] = useState(
     userData?.image || userData?.avatar || ""
@@ -59,16 +61,24 @@ export default function UserProfile() {
   useEffect(() => {
     if (userData) {
       setUsername(userData.username || userData.name || "");
-      setName(
+      const fullName =
         userData.name ||
-          (userData.firstName
-            ? `${userData.firstName || ""} ${userData.lastName || ""}`.trim()
-            : "")
-      );
+        (userData.firstName
+          ? `${userData.firstName || ""} ${userData.lastName || ""}`.trim()
+          : "");
+      setName(fullName);
       setEmail(userData.email || "");
       setAvatarPreview(userData.image || userData.avatar || "");
     }
   }, [userData]);
+
+  if (isLoading && !userData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   function handleAvatarChange(e) {
     const file = e.target.files[0];

@@ -69,32 +69,29 @@ export async function updateComment(commentId, body) {
   );
   return response;
 }
-export async function getLoggedUserData() {
+export async function getLoggedUserData(tokenOverride) {
   const BASE_URL =
     import.meta.env.VITE_BASE_URL || "https://route-posts.routemisr.com";
-  const token = localStorage.getItem("token");
+  const token = tokenOverride || localStorage.getItem("token") || "";
 
-  // If no real token, fall back to dummy data so the app still works
+  const DUMMY_USER = {
+    id: 1,
+    username: "Asmaa Nassef",
+    name: "Asmaa Nassef",
+    email: "asmaa@example.com",
+    image: "https://i.pravatar.cc/150?img=5",
+    avatar: "https://i.pravatar.cc/150?img=5",
+  };
+
   if (!token || token.startsWith("dummy-token-")) {
-    return {
-      data: {
-        id: 1,
-        username: "Asmaa Nassef",
-        email: "Asmaa@example.com",
-        image: "https://i.pravatar.cc/150?img=5",
-        avatar: "https://i.pravatar.cc/150?img=5",
-      },
-    };
+    return { data: DUMMY_USER };
   }
 
   const response = await axios.get(
     `${BASE_URL}/api/v1/users/getLoggedUserData`,
-    {
-      headers: { token },
-    }
+    { headers: { token } }
   );
 
-  // Normalize: ensure both `image` and `avatar` are set from the response
   const user = response.data?.user || response.data;
   if (user && user.image && !user.avatar) user.avatar = user.image;
   if (user && user.avatar && !user.image) user.image = user.avatar;

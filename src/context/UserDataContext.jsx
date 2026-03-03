@@ -1,37 +1,55 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import { getLoggedUserData } from "../services/PostsServices";
 
 export const UserContext = createContext();
 
-function UserContextProvider({ children }) {
-  const [userData, setUserData] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem("token") || "");
+const DUMMY_USER = {
+  id: 1,
+  username: "Asmaa Nassef",
+  name: "Asmaa Nassef",
+  email: "asmaa@example.com",
+  image: "https://i.pravatar.cc/150?img=5",
+  avatar: "https://i.pravatar.cc/150?img=5",
+};
 
-  async function fetchLoggedUserData() {
+function normalizeUser(data) {
+  if (!data) return DUMMY_USER;
+  const normalized = { ...data };
+  if (normalized.image && !normalized.avatar)
+    normalized.avatar = normalized.image;
+  if (normalized.avatar && !normalized.image)
+    normalized.image = normalized.avatar;
+  return normalized;
+}
+
+function UserContextProvider({ children }) {
+  const storedToken = localStorage.getItem("token") || "";
+  const isDummy = !storedToken || storedToken.startsWith("dummy-token-");
+
+  const [userData, setUserData] = useState(isDummy ? DUMMY_USER : null);
+  const [isLoading, setIsLoading] = useState(!isDummy);
+  const [token, setToken] = useState(storedToken);
+
+  const fetchLoggedUserData = useCallback(async (activeToken) => {
+    if (!activeToken || activeToken.startsWith("dummy-token-")) {
+      setUserData(DUMMY_USER);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
-      const { data } = await getLoggedUserData();
-      console.log("Logged user data:", data);
-      // Normalize so both `image` and `avatar` are always set
-      const normalized = { ...data };
-      if (normalized.image && !normalized.avatar)
-        normalized.avatar = normalized.image;
-      if (normalized.avatar && !normalized.image)
-        normalized.image = normalized.avatar;
-      setUserData(normalized);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
+      const { data } = await getLoggedUserData(activeToken);
+      setUserData(normalizeUser(data));
+    } catch {
+      setUserData(DUMMY_USER);
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    if (token) {
-      fetchLoggedUserData();
-    }
-  }, [token]);
+    fetchLoggedUserData(token);
+  }, [token, fetchLoggedUserData]);
 
   return (
     <UserContext.Provider
