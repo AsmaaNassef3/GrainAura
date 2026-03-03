@@ -11,7 +11,6 @@ export function getAllPosts() {
       sort: "-createdAt",
     },
   });
-
 }
 
 export async function getSinglePost(postId) {
@@ -71,7 +70,8 @@ export async function updateComment(commentId, body) {
   return response;
 }
 export async function getLoggedUserData() {
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const BASE_URL =
+    import.meta.env.VITE_BASE_URL || "https://route-posts.routemisr.com";
   const token = localStorage.getItem("token");
 
   // If no real token, fall back to dummy data so the app still works
