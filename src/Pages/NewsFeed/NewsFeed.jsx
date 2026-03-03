@@ -8,35 +8,44 @@ import PostCardSkeleton from "../Skeleton/Skeleton";
 import PostModal from "../PostModal/PostModal";
 import CreatePostModal from "../CreatePost/CreatePostModal";
 import { getAllPosts } from "../../services/PostsServices";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function NewsFeed() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [extraPosts, setExtraPosts] = useState([]);
+  const [deletedIds, setDeletedIds] = useState([]);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editPost, setEditPost] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  useEffect(() => {
-    async function getPosts() {
-      try {
-        const { data } = await getAllPosts();
-        setPosts(data.posts || []);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    getPosts();
-  }, []);
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isError: _isError,
+    error: _error,
+  } = useQuery({
+    queryKey: ["posts"],
+    queryFn: getAllPosts,
+  
+  });
+
+  // Merge API posts with locally added/edited/deleted posts
+  const fetchedPosts = data?.data?.posts ?? [];
+  const posts = [
+    ...extraPosts,
+    ...fetchedPosts.filter(
+      (p) =>
+        !extraPosts.some((ep) => ep.id === p.id) && !deletedIds.includes(p.id)
+    ),
+  ];
 
   // Called by CreatePostModal after a successful post creation.
   // The dummy API doesn't persist data, so we add the new post
   // locally to the top of the list ourselves.
   function addPostToFeed(newPost) {
-    setPosts((prev) => [newPost, ...prev]);
+    setExtraPosts((prev) => [newPost, ...prev]);
   }
 
   // Called when the user opens the three-dots "Edit Post" on a post card
@@ -52,14 +61,15 @@ export default function NewsFeed() {
 
   // Called by CreatePostModal after a successful update — patch the post in-place
   function handlePostUpdated(updatedPost) {
-    setPosts((prev) =>
+    setExtraPosts((prev) =>
       prev.map((p) => (p.id === updatedPost.id ? { ...p, ...updatedPost } : p))
     );
   }
 
   // Called by PostCards when a post is deleted
   function handleDeletePost(postId) {
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
+    setExtraPosts((prev) => prev.filter((p) => p.id !== postId));
+    setDeletedIds((prev) => [...prev, postId]);
   }
 
   function handleViewMoreComments(postId) {
@@ -91,7 +101,7 @@ export default function NewsFeed() {
             <CreatePost onPostCreated={addPostToFeed} />
           </div>
           <div className="mt-0">
-            {loading
+            {isLoading || isFetching
               ? Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="mb-4">
                     <PostCardSkeleton />

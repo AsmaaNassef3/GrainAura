@@ -2,8 +2,8 @@ import axios from "axios";
 
 const DUMMY_API = "https://dummyjson.com";
 
-export async function getAllPosts() {
-  const response = await axios.get(`${DUMMY_API}/posts?`, {
+export function getAllPosts() {
+  return axios.get(`${DUMMY_API}/posts?`, {
     params: {
       limit: 15,
       skip: 0,
@@ -11,7 +11,7 @@ export async function getAllPosts() {
       sort: "-createdAt",
     },
   });
-  return response;
+
 }
 
 export async function getSinglePost(postId) {
